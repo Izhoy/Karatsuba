@@ -11,6 +11,7 @@ bool operator<(const string, const string);
 bool operator==(const string, const string);
 
 string multiplication_by_10(string&, size_t); // multiplication by 10 to the power
+void to_equal_size(string&, string&); // adding strings to the same length
 
 
 int main() {
@@ -37,53 +38,47 @@ string operator*(const string Str1,const string Str2) {
 	else if (Str1.at(0) == '-' && Str2.at(0) != '-') return (Str1.substr(1) * Str2).insert(0, 1, '-');
 	else if (Str1.at(0) != '-' && Str2.at(0) == '-') return (Str1 * Str2.substr(1)).insert(0, 1, '-');
 
-	string Production;
+	string XY;
 
 	// Base case
-	if (Str1.size() == 1 && Str2.size() == 1) {
-		Production = to_string(stoi(Str1) * stoi(Str2));
-		return Production;
+	if (Str1.size() <= 2 && Str2.size() <= 2) {
+		XY = to_string(stoi(Str1) * stoi(Str2));
+		return XY;
 	}
 
 	// Recursion case
 	else {
-		string a, b, c, d, ac, bd, bc, ad;
+		// We complement one of the multipliers to the same even length by adding zeros to the beginning
+		string X = Str1, Y = Str2;
+		to_equal_size(X, Y);
+		size_t n = X.size(); // Size of multipliers
+		string a, b, c, d, p, q, ac, bd, pq, adbc;
 		
-		// Split first number by 2 parts (a and b)
-		if (Str1.size() == 1) {
-			a = Str1;
-			b = "0";
+		// Split first multipliers on 2 parts (a and b)
+		
+		for (size_t i = 0; i < n / 2; ++i) {
+			a.push_back(X.at(i));
+			b.push_back(X.at(n / 2 + i));
 		}
-		else {
-			for (size_t i = 0; i < Str1.size() / 2; ++i) {
-				a.push_back(Str1.at(i));
-				b.push_back(Str1.at(Str1.size() / 2 + i));
-			}
+		// Split second multipliers on 2 parts (c and d)
+		for (size_t i = 0; i < n / 2; ++i) {
+			c.push_back(Y.at(i));
+			d.push_back(Y.at(n / 2 + i));
 		}
 
-		// Split second number by 2 parts (c and d)
-		if (Str2.size() == 1) {
-			c = Str2;
-			d = "0";
-		}
-		else {
-			for (size_t i = 0; i < Str2.size() / 2; ++i) {
-				c.push_back(Str2.at(i));
-				d.push_back(Str2.at(Str2.size() / 2 + i));
-			}
-		}
+		p = a + b;
+		q = c + d;
 		// Recursively calculate
-		bc = b * c;
 		ac = a * c;
 		bd = b * d;
-		ad = a * d;
+		pq = p * q;
+		adbc = pq - ac - bd;
 
-		// The final formula
-		Production = multiplication_by_10(ac, Str1.size()/2 + Str2.size()/2) + 
-			multiplication_by_10(ad, Str1.size() / 2) + multiplication_by_10(bc, Str2.size()/2) + bd;
+		// final formula
+		XY = multiplication_by_10(ac, n) + multiplication_by_10(adbc, n / 2) + bd;
 	}
 
-	return Production;
+	return XY;
 }
 
 // overloading the addition operator
@@ -224,4 +219,13 @@ string multiplication_by_10(string &number, size_t power){
 	}
 
 	return number;
+}
+
+// We complement the lines to the same length by adding zeros to the beginning
+void to_equal_size(string& Str1, string& Str2) {
+	size_t n = max(Str1.size(), Str2.size());
+	if (n % 2 != 0) ++n;
+
+	Str1.insert(0, n - Str1.size(), '0');
+	Str2.insert(0, n - Str2.size(), '0');
 }
